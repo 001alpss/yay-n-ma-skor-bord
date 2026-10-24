@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Premier League Live Scorebug</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700;800;900&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: transparent;
+      display: flex;
+      padding: 20px;
+    }
+
+    /* Premier League Scorebug Container */
+    .pl-scoreboard {
+      display: flex;
+      align-items: center;
+      height: 48px;
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      font-size: 16px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    /* Ev Sahibi Takım Bandı */
+    .team-home {
+      background-color: #38003c;
+      color: #ffffff;
+      padding: 0 16px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      letter-spacing: 1px;
+    }
+
+    /* Skor Kutusu */
+    .score-box {
+      background-color: #e90052;
+      color: #ffffff;
+      padding: 0 14px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    /* Deplasman Takımı Bandı */
+    .team-away {
+      background-color: #38003c;
+      color: #ffffff;
+      padding: 0 16px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      letter-spacing: 1px;
+    }
+
+    /* Dakika / Canlı Rozeti */
+    .match-time {
+      background-color: #00ff87;
+      color: #38003c;
+      padding: 0 12px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 900;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="pl-scoreboard">
+    <div class="team-home" id="ev-takim">-</div>
+    <div class="score-box" id="skor">- - -</div>
+    <div class="team-away" id="dep-takim">-</div>
+    <div class="match-time" id="dakika">-</div>
+  </div>
+
+  <script>
+    async function verileriGuncelle() {
+      try {
+        const response = await fetch('/api/data');
+        if (!response.ok) throw new Error('API error');
+
+        const veri = await response.json();
+        const ev = veri.ev || '-';
+        const dep = veri.dep || '-';
+        const evSkor = veri.ev_skor || '-';
+        const depSkor = veri.dep_skor || '-';
+        const dk = veri.dakika || '-';
+
+        document.getElementById('ev-takim').innerText = ev;
+        document.getElementById('dep-takim').innerText = dep;
+        document.getElementById('skor').innerText = `${evSkor} - ${depSkor}`;
+        document.getElementById('dakika').innerText = dk;
+      } catch (e) {
+        try {
+          const ev = await (await fetch('ev_takim.txt')).text();
+          const dep = await (await fetch('dep_takim.txt')).text();
+          const evSkor = await (await fetch('ev_skor.txt')).text();
+          const depSkor = await (await fetch('dep_skor.txt')).text();
+          const dk = await (await fetch('dakika.txt')).text();
+
+          document.getElementById('ev-takim').innerText = ev || '-';
+          document.getElementById('dep-takim').innerText = dep || '-';
+          document.getElementById('skor').innerText = `${evSkor || '-'} - ${depSkor || '-'}`;
+          document.getElementById('dakika').innerText = dk || '-';
+        } catch (fallbackError) {
+          console.log('Veri okunamadı, bekleniyor...');
+        }
+      }
+    }
+
+    setInterval(verileriGuncelle, 3000);
+    verileriGuncelle();
+  </script>
+</body>
+</html>
